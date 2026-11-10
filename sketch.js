@@ -15,8 +15,8 @@ const pts=Array.from({length:16},(_,i)=>({n:i+1,x:(i%4)*1.0+(Math.floor(i/4)%2?0
 const minX=0,maxX=3.42,minY=0,maxY=2.76;
 async function setup(){createCanvas(windowWidth,windowHeight);pixelDensity(1);bleSetup();resetButton=createButton('RESET');resetButton.id('resetButton');resetButton.mousePressed(resetScene);const status=createDiv('Waiting for camera');status.id('status');handPose=await ml5.handPose();video=createCapture({video:{facingMode:'user'},audio:false});video.size(640,480);video.hide();handPose.detectStart(video,r=>hands=r);status.html('Camera tracking active');}
 function kp(hand,i){return hand.keypoints&&hand.keypoints[i];}
-function point(hand,i){const p=kp(hand,i);return p?{x:width*(1-p.x/640),y:height*p.y/480}:null;}
-function center(hand){const ids=[0,5,9,13,17],v=ids.map(i=>point(hand,i)).filter(Boolean);return v.length?{x:v.reduce((s,p)=>s+p.x,0)/v.length,y:v.reduce((s,p)=>s+p.y,0)/v.length}:null;}
+function handPoint(hand,i){const p=kp(hand,i);return p?{x:width*(1-p.x/640),y:height*p.y/480}:null;}
+function center(hand){const ids=[0,5,9,13,17],v=ids.map(i=>handPoint(hand,i)).filter(Boolean);return v.length?{x:v.reduce((s,p)=>s+p.x,0)/v.length,y:v.reduce((s,p)=>s+p.y,0)/v.length}:null;}
 function fistScore(hand){const wrist=kp(hand,0);if(!wrist)return 0;let closed=0;for(const [tip,base] of [[8,5],[12,9],[16,13],[20,17]]){const a=kp(hand,tip),b=kp(hand,base);if(!a||!b)continue;const dt=Math.hypot(a.x-wrist.x,a.y-wrist.y),db=Math.hypot(b.x-wrist.x,b.y-wrist.y);if(dt<db*1.45)closed++;}return closed/4;}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function handDistance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
